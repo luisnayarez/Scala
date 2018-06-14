@@ -4,13 +4,15 @@ import org.scalatest.FlatSpec
 import java.io.File
 
 class MatcherTests extends FlatSpec {
+  val testFilesRootPath = "C:\\Demo\\Filesearcher\\testfiles\\"
+  
   "Matcher that is passed a file matching the filter" should
   "return a list with that file name" in {
     val matcher = new Matcher("fake", "fakePath")
      
     val results = matcher.execute()
     
-    assert(results == List("fakePath"))
+    assert(results == List(("C:\\Demo\\Filesearcher\\fakePath", None)))
   }
   
   "Matcher using a directory containing one file matching the filter" should
@@ -19,7 +21,7 @@ class MatcherTests extends FlatSpec {
       
     val results = matcher.execute()  
     
-    assert(results == List("readme.txt"))
+    assert(results == List((s"${testFilesRootPath}readme.txt", None)))
   }
   
   "Matcher that is not passed a root file location" should
@@ -36,6 +38,27 @@ class MatcherTests extends FlatSpec {
     
     val results = matcher.execute()
     
-    assert(results == List("notes.txt", "readme.txt")) 
+    assert(results == List((s"${testFilesRootPath}SomeRandomSubFolder\\notes.txt", None), 
+                           (s"${testFilesRootPath}readme.txt", None))) 
+  }
+  
+  "Matcher given a path that has one file that matches file filter and content filter" should
+  "return a list with that file name" in {
+    val matcher = new Matcher("data", new File(".").getCanonicalPath(), true, 
+                              Some("pluralsight"))
+      
+    val matchedFiles = matcher.execute()
+      
+    assert(matchedFiles == List((s"${testFilesRootPath}pluralsight.data", Some(3))))
+  }
+  
+  "Matcher given a path that has no file that matches file filter and content filter" should
+  "return an empty list" in {
+    val matcher = new Matcher("txt", new File(".").getCanonicalPath(), true, 
+                              Some("pluralsight"))
+      
+    val matchedFiles = matcher.execute()
+      
+    assert(matchedFiles == List())
   }
 }
